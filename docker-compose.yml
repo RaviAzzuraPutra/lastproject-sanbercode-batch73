@@ -1,0 +1,41 @@
+services:
+  postgresql:
+    image: postgres:17.6
+    container_name: last_project_sanbercode_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/INIT.sql:/docker-entrypoint-initdb.d/INIT.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+  
+  inventory_optimizer_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: last_project_sanbercode:latest
+    container_name: inventory-optimizer-app
+    restart: unless-stopped
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    environment:
+      - APP_PORT=:${APP_PORT}
+    netwokrs:
+      - app_network
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+  networks:
+    app_network:
+      driver: bridge
