@@ -51,6 +51,7 @@ CREATE TABLE barang (
     name VARCHAR(225) NOT NULL,
     sku VARCHAR(225) NOT NULL,
     stock INT DEFAULT 0,
+    image_url VARCHAR(225) NOT NULL,
     need_restock BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -76,6 +77,7 @@ CREATE TABLE smart_log (
     gudang_id UUID NOT NULL,
     category_id UUID NOT NULL,
     eoq_calculation_result INT,
+    decision VARCHAR(225)
     ai_insight VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

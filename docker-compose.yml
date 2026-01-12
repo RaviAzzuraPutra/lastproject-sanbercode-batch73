@@ -30,12 +30,12 @@ services:
       - ${APP_PORT}:${APP_PORT}
     environment:
       - APP_PORT=:${APP_PORT}
-    netwokrs:
+    networks:
       - app_network
     depends_on:
       postgresql:
         condition: service_healthy
 
-  networks:
-    app_network:
-      driver: bridge
+networks:
+  app_network:
+    driver: bridge
