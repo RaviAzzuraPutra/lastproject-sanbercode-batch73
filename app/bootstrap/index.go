@@ -4,6 +4,8 @@ import (
 	"last-project/app/config"
 	"last-project/app/config/port_config"
 	"last-project/app/database"
+	"last-project/app/registry/auth_registry"
+	"last-project/app/router/auth_router"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -27,6 +29,10 @@ func InitApp() {
 			"Message": "The application is running smoothly 👍",
 		})
 	})
+
+	AuthModules := auth_registry.AuthRegistry()
+
+	auth_router.AuthRouter(app, AuthModules.Auth_Controller)
 
 	app.Run(port_config.PORT)
 }

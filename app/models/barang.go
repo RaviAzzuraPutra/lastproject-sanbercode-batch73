@@ -6,8 +6,8 @@ import (
 
 type Barang struct {
 	ID             *string   `json:"ID" gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	Gudang_id      *string   `json:"gudang_id"`
-	Category_id    *string   `json:"category_id"`
+	GudangID       *string   `json:"gudang_id"`
+	CategoryID     *string   `json:"category_id"`
 	Name           *string   `json:"name"`
 	Sku            *string   `json:"sku"`
 	Image_url      *string   `json:"image_url"`
@@ -18,8 +18,8 @@ type Barang struct {
 	CreatedAt      time.Time `gorm:"column:created_at"`
 	UpdatedAt      time.Time `gorm:"column:updated_at"`
 
-	Gudang   Gudang   `gorm:"foreignKey:Gudang_id;references:ID;constraint:OnDelete:CASCADE"`
-	Category Category `gorm:"foreignKey:Category_id;references:ID"`
+	Gudang   Gudang   `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
+	Category Category `gorm:"foreignKey:CategoryID;references:ID"`
 }
 
 func (Barang) TableName() string {

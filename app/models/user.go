@@ -12,6 +12,8 @@ type User struct {
 	No_Telp   *string   `json:"no_telp"`
 	CreatedAt time.Time `gorm:"column:created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at"`
+
+	Toko *Toko `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE"`
 }
 
 func (User) TableName() string {

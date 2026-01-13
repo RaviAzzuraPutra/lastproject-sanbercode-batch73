@@ -6,8 +6,8 @@ import (
 
 type Smart_Log struct {
 	ID                     *string   `json:"ID" gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	Barang_id              *string   `json:"barang_id"`
-	Gudang_id              *string   `json:"gudang_id"`
+	BarangID               *string   `json:"barang_id"`
+	GudangID               *string   `json:"gudang_id"`
 	Period_month           *int      `json:"period_month"`
 	Period_year            *int      `json:"period_year"`
 	EOQ_calculation_result *int      `json:"eoq_calculation_result"`
@@ -16,8 +16,8 @@ type Smart_Log struct {
 	CreatedAt              time.Time `gorm:"column:created_at"`
 	UpdatedAt              time.Time `gorm:"column:updated_at"`
 
-	Barang Barang `gorm:"foreignKey:Barang_id;references:ID;constraint:OnDelete:CASCADE"`
-	Gudang Gudang `gorm:"foreignKey:Gudang_id;references:ID"`
+	Barang Barang `gorm:"foreignKey:BarangID;references:ID;constraint:OnDelete:CASCADE"`
+	Gudang Gudang `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
 }
 
 func (Smart_Log) TableName() string {
