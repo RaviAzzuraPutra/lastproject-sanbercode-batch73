@@ -25,7 +25,7 @@ func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand 
 	client, clientError := genai.NewClient(ctx, option.WithAPIKey(gemini_config.GEMINI_API_KEY))
 
 	if clientError != nil {
-		return 0, "", "", clientError
+		return 0, "", "", NewInternalServerError(clientError.Error())
 	}
 
 	defer client.Close()
@@ -69,11 +69,11 @@ func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand 
 
 	resp, err := geminiModel.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		return 0, "", "", err
+		return 0, "", "", NewInternalServerError(err.Error())
 	}
 
 	if len(resp.Candidates) == 0 {
-		return 0, "", "", fmt.Errorf("no response from Gemini")
+		return 0, "", "", NewInternalServerError("no response from Gemini")
 	}
 
 	var text string
@@ -87,7 +87,7 @@ func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand 
 	end := strings.LastIndex(text, "}")
 
 	if start == -1 || end == -1 {
-		return 0, "", "", fmt.Errorf("invalid AI JSON response\nRaw: %s", text)
+		return 0, "", "", NewInternalServerError("invalid AI JSON response\nRaw: " + text)
 	}
 
 	jsonStr := text[start : end+1]
@@ -100,13 +100,13 @@ func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand 
 	jsonStr = strings.TrimSpace(jsonStr)
 
 	if !json.Valid([]byte(jsonStr)) {
-		return 0, "", "", fmt.Errorf("invalid JSON format\nResponse: %s", text)
+		return 0, "", "", NewInternalServerError("invalid JSON format\nResponse: " + text)
 	}
 
 	var result InventoryAiResponse
 
 	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
-		return 0, "", "", fmt.Errorf("failed to parse JSON: %v\nResponse: %s", err, text)
+		return 0, "", "", NewInternalServerError("failed to parse JSON: " + err.Error() + text)
 	}
 
 	return result.EOQRecomendation, result.Decision, result.Insight, nil

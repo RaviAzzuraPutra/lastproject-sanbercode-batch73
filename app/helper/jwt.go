@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"errors"
 	"last-project/app/config/jwt_config"
 	"time"
 
@@ -32,20 +31,20 @@ func ParseJWT(tokenString string) (*JWTClaims, error) {
 		func(token *jwt.Token) (interface{}, error) {
 
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+				return nil, NewInternalServerError("unexpected signing method")
 			}
 
 			return []byte(jwt_secret), nil
 		})
 
 	if err != nil {
-		return nil, errors.New("An error occurred while retrieving the token.")
+		return nil, NewInternalServerError("An error occurred while retrieving the token.")
 	}
 
 	claims, ok := token.Claims.(*JWTClaims)
 
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, NewUnauthorizedError("invalid token")
 	}
 
 	return claims, nil
