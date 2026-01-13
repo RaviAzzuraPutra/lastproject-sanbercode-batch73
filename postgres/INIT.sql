@@ -1,16 +1,15 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TYPE trx_type AS ENUM ("in", "out")
+CREATE TYPE trx_type AS ENUM ('in', 'out');
 
-CREATE TABLE "user" (
+CREATE TABLE user (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(225) NOT NULL,
     email VARCHAR(225) NOT NULL UNIQUE,
     password VARCHAR(225) NOT NULL,
     no_telp VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE toko (
@@ -20,7 +19,6 @@ CREATE TABLE toko (
     address VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
     CONSTRAINT fk_toko_user FOREIGN KEY (user_id) REFERENCES "user"(id)
 );
 
@@ -31,7 +29,6 @@ CREATE TABLE gudang (
     address VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
     CONSTRAINT fk_gudang_toko FOREIGN KEY (toko_id) REFERENCES toko(id)
 );
 
@@ -40,8 +37,7 @@ CREATE TABLE category (
     name VARCHAR(225) NOT NULL,
     description VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE barang (
@@ -50,12 +46,13 @@ CREATE TABLE barang (
     category_id UUID NOT NULL,
     name VARCHAR(225) NOT NULL,
     sku VARCHAR(225) NOT NULL,
-    stock INT DEFAULT 0,
     image_url VARCHAR(225) NOT NULL,
+    stock INT DEFAULT 0,
+    safety_stock INT DEFAULT 0,
     need_restock BOOLEAN DEFAULT FALSE,
+    lead_time_days INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
     CONSTRAINT fk_barang_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id),
     CONSTRAINT fk_barang_category FOREIGN KEY (category_id) REFERENCES category(id)
 );
@@ -63,28 +60,28 @@ CREATE TABLE barang (
 CREATE TABLE trx_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     barang_id UUID NOT NULL,
+    gudang_id UUID NOT NULL,
     qty INT NOT NULL,
     type trx_type NOT NULL, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
-    CONSTRAINT fk_trx_barang FOREIGN KEY (barang_id) REFERENCES barang(id)
+    CONSTRAINT fk_trx_barang FOREIGN KEY (barang_id) REFERENCES barang(id),
+    CONSTRAINT fk_trx_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id)
 );
 
 CREATE TABLE smart_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     barang_id UUID NOT NULL,
     gudang_id UUID NOT NULL,
-    category_id UUID NOT NULL,
+    period_month INT,
+    period_year INT,
     eoq_calculation_result INT,
-    decision VARCHAR(225)
-    ai_insight VARCHAR(225),
+    rop_value INT,
+    ai_insight TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP,
     CONSTRAINT fk_smart_barang FOREIGN KEY (barang_id) REFERENCES barang(id),
-    CONSTRAINT fk_smart_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id),
-    CONSTRAINT fk_smart_category FOREIGN KEY (category_id) REFERENCES category(id)
+    CONSTRAINT fk_smart_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id)    
 );
 
 CREATE INDEX idx_barang_sku ON barang(sku);

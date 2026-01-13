@@ -13,9 +13,9 @@ services:
       - ./postgres/INIT.sql:/docker-entrypoint-initdb.d/INIT.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 3s
-      timeout: 5s
-      retries: 5
+      interval: 11s
+      timeout: 6s
+      retries: 7
     networks:
       - app_network
   
@@ -30,6 +30,18 @@ services:
       - ${APP_PORT}:${APP_PORT}
     environment:
       - APP_PORT=:${APP_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SSLMODE=${DB_SSLMODE}
+      - DB_TIMEZONE=${DB_TIMEZONE}
+      - JWT_SECRET=${JWT_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - MODEL=${MODEL}
     networks:
       - app_network
     depends_on:
