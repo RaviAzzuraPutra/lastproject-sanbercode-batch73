@@ -19,7 +19,7 @@ CREATE TABLE toko (
     address VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_toko_user FOREIGN KEY (user_id) REFERENCES "user"(id)
+    CONSTRAINT fk_toko_user FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
 CREATE TABLE gudang (
@@ -29,7 +29,7 @@ CREATE TABLE gudang (
     address VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_gudang_toko FOREIGN KEY (toko_id) REFERENCES toko(id)
+    CONSTRAINT fk_gudang_toko FOREIGN KEY (toko_id) REFERENCES toko(id) ON DELETE CASCADE
 );
 
 CREATE TABLE category (
@@ -53,8 +53,8 @@ CREATE TABLE barang (
     lead_time_days INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_barang_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id),
-    CONSTRAINT fk_barang_category FOREIGN KEY (category_id) REFERENCES category(id)
+    CONSTRAINT fk_barang_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id) ON DELETE CASCADE,
+    CONSTRAINT fk_barang_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
 );
 
 CREATE TABLE trx_log (
@@ -65,8 +65,8 @@ CREATE TABLE trx_log (
     type trx_type NOT NULL, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_trx_barang FOREIGN KEY (barang_id) REFERENCES barang(id),
-    CONSTRAINT fk_trx_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id)
+    CONSTRAINT fk_trx_barang FOREIGN KEY (barang_id) REFERENCES barang(id) ON DELETE CASCADE,
+    CONSTRAINT fk_trx_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id) ON DELETE CASCADE
 );
 
 CREATE TABLE smart_log (
@@ -80,8 +80,8 @@ CREATE TABLE smart_log (
     ai_insight TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_smart_barang FOREIGN KEY (barang_id) REFERENCES barang(id),
-    CONSTRAINT fk_smart_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id)    
+    CONSTRAINT fk_smart_barang FOREIGN KEY (barang_id) REFERENCES barang(id) ON DELETE CASCADE,
+    CONSTRAINT fk_smart_gudang FOREIGN KEY (gudang_id) REFERENCES gudang(id)  ON DELETE CASCADE  
 );
 
 CREATE INDEX idx_barang_sku ON barang(sku);

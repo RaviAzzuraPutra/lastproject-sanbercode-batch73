@@ -10,6 +10,6 @@ import (
 func TokoRouter(app *gin.Engine, TokoController *toko_controller.Toko_Controller) {
 	toko := app.Group("/api/toko", middleware.JWTMiddleware())
 
-	toko.GET("/:id", TokoController.Get)
+	toko.GET("/", TokoController.Get)
 	toko.PUT("/update/:id", TokoController.Update)
 }

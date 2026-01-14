@@ -17,10 +17,10 @@ func NewTokoRepositoryResgistry() *Toko_Repository {
 	}
 }
 
-func (repo *Toko_Repository) GetByIdAndIdUser(ID string, IDUser string) (*models.Toko, error) {
+func (repo *Toko_Repository) GetByIdUser(IDUser string) (*models.Toko, error) {
 	var toko *models.Toko
 
-	errGet := repo.DB.Table("toko").Where("id = ? and user_id = ?", ID, IDUser).First(&toko).Error
+	errGet := repo.DB.Table("toko").Where("user_id = ?", IDUser).First(&toko).Error
 
 	return toko, errGet
 }

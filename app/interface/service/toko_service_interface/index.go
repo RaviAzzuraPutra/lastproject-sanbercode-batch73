@@ -6,6 +6,6 @@ import (
 )
 
 type Toko_Service_Interface interface {
-	GetByIdAndIdUser(ID string, IDUser string) (*models.Toko, error)
+	GetByIdAndIdUser(IDUser string) (*models.Toko, error)
 	UpdateToko(ID string, IDUser string, request *toko_request.Toko_Request) (*models.Toko, error)
 }

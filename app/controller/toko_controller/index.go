@@ -19,8 +19,6 @@ func NewTokoControllerRegistry(service toko_service_interface.Toko_Service_Inter
 }
 
 func (c *Toko_Controller) Get(ctx *gin.Context) {
-	ID := ctx.Param("id")
-
 	value, exist := ctx.Get("user_id")
 
 	if !exist {
@@ -32,7 +30,7 @@ func (c *Toko_Controller) Get(ctx *gin.Context) {
 
 	userID := value.(string)
 
-	toko, errGet := c.service.GetByIdAndIdUser(ID, userID)
+	toko, errGet := c.service.GetByIdAndIdUser(userID)
 
 	if errGet != nil {
 		if appError, ok := errGet.(*helper.AppError); ok {

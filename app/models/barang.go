@@ -19,7 +19,7 @@ type Barang struct {
 	UpdatedAt      time.Time `gorm:"column:updated_at"`
 
 	Gudang   Gudang   `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
-	Category Category `gorm:"foreignKey:CategoryID;references:ID"`
+	Category Category `gorm:"foreignKey:CategoryID;references:ID;constraint:OnDelete:SET NULL"`
 }
 
 func (Barang) TableName() string {
