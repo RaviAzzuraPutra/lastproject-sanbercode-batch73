@@ -34,10 +34,13 @@ CREATE TABLE gudang (
 
 CREATE TABLE category (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    toko_id UUID NOT NULL
     name VARCHAR(225) NOT NULL,
     description VARCHAR(225),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_category_toko FOREIGN KEY (toko_id) REFERENCES toko(id) ON DELETE CASCADE,
+    CONSTRAINT unique_category_per_toko UNIQUE (toko_id, name)
 );
 
 CREATE TABLE barang (
