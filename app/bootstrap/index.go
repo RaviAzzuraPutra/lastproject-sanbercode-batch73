@@ -5,9 +5,11 @@ import (
 	"last-project/app/config/port_config"
 	"last-project/app/database"
 	"last-project/app/registry/auth_registry"
+	"last-project/app/registry/gudang_registry"
 	"last-project/app/registry/toko_registry"
 	"last-project/app/registry/user_registry"
 	"last-project/app/router/auth_router"
+	"last-project/app/router/gudang_router"
 	"last-project/app/router/toko_router"
 	"last-project/app/router/user_router"
 
@@ -37,10 +39,12 @@ func InitApp() {
 	AuthModules := auth_registry.AuthRegistry()
 	TokoModules := toko_registry.Toko_Registry()
 	UserModules := user_registry.User_Registry()
+	GudangModules := gudang_registry.Gudang_Registry()
 
 	auth_router.AuthRouter(app, AuthModules.Auth_Controller)
 	toko_router.TokoRouter(app, TokoModules.TokoController)
 	user_router.User_Register(app, UserModules.UserController)
+	gudang_router.GudangRouter(app, GudangModules.GudangController)
 
 	app.Run(port_config.PORT)
 }

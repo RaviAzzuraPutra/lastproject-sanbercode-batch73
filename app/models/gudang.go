@@ -12,7 +12,7 @@ type Gudang struct {
 	CreatedAt time.Time `gorm:"column:created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at"`
 
-	Toko Toko `gorm:"foreignKey:TokoID;references:ID;constraint:OnDelete:CASCADE"`
+	Toko *Toko `gorm:"foreignKey:TokoID;references:ID;constraint:OnDelete:CASCADE"`
 }
 
 func (Gudang) TableName() string {

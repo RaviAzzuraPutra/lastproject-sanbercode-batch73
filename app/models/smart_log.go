@@ -16,8 +16,8 @@ type Smart_Log struct {
 	CreatedAt              time.Time `gorm:"column:created_at"`
 	UpdatedAt              time.Time `gorm:"column:updated_at"`
 
-	Barang Barang `gorm:"foreignKey:BarangID;references:ID;constraint:OnDelete:CASCADE"`
-	Gudang Gudang `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
+	Barang *Barang `gorm:"foreignKey:BarangID;references:ID;constraint:OnDelete:CASCADE"`
+	Gudang *Gudang `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
 }
 
 func (Smart_Log) TableName() string {
