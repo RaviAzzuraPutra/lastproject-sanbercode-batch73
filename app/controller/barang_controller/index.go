@@ -44,7 +44,7 @@ func (c *Barang_Controller) Create(ctx *gin.Context) {
 		return
 	}
 
-	tempPath := fmt.Sprintf("temp/%s", file.Filename)
+	tempPath := fmt.Sprintf("temp/%d-%s", time.Now().UnixNano(), file.Filename)
 	if err := ctx.SaveUploadedFile(file, tempPath); err != nil {
 		ctx.JSON(500, gin.H{
 			"Message": "Failed to save uploaded file",
@@ -53,8 +53,6 @@ func (c *Barang_Controller) Create(ctx *gin.Context) {
 		return
 	}
 
-	defer os.Remove(tempPath)
-
 	request.Image_url = &tempPath
 
 	ID_Gudang := ctx.Param("id_gudang")
@@ -62,6 +60,7 @@ func (c *Barang_Controller) Create(ctx *gin.Context) {
 	value, exist := ctx.Get("user_id")
 
 	if !exist {
+		os.Remove(tempPath)
 		ctx.JSON(401, gin.H{
 			"Message": "Your session has expired or is invalid. Please log in again.",
 		})
@@ -73,6 +72,7 @@ func (c *Barang_Controller) Create(ctx *gin.Context) {
 	barang, errCreate := c.service.Create(request, ID_Gudang, userID)
 
 	if errCreate != nil {
+		os.Remove(tempPath)
 		if appError, ok := errCreate.(*helper.AppError); ok {
 			ctx.JSON(appError.Code, gin.H{
 				"Message": appError.Message,
@@ -209,26 +209,18 @@ func (c *Barang_Controller) Update(ctx *gin.Context) {
 
 	file, errFoto := ctx.FormFile("image_url")
 
+	var tempPath string
 	if errFoto == nil {
-		tempPath := fmt.Sprintf("temp/%d-%s", time.Now().UnixNano(), file.Filename)
-		if err := ctx.SaveUploadedFile(file, tempPath); err == nil {
-			request.Image_url = &tempPath
-			defer os.Remove(tempPath)
+		tempPath = fmt.Sprintf("temp/%d-%s", time.Now().UnixNano(), file.Filename)
+		if err := ctx.SaveUploadedFile(file, tempPath); err != nil {
+			ctx.JSON(500, gin.H{
+				"Message": "Failed to save uploaded file",
+				"Error":   err.Error(),
+			})
+			return
 		}
+		request.Image_url = &tempPath
 	}
-
-	tempPath := fmt.Sprintf("temp/%d-%s", time.Now().UnixNano(), file.Filename)
-	if err := ctx.SaveUploadedFile(file, tempPath); err != nil {
-		ctx.JSON(500, gin.H{
-			"Message": "Failed to save uploaded file",
-			"Error":   err.Error(),
-		})
-		return
-	}
-
-	defer os.Remove(tempPath)
-
-	request.Image_url = &tempPath
 
 	ID_Gudang := ctx.Param("id_gudang")
 
@@ -237,6 +229,9 @@ func (c *Barang_Controller) Update(ctx *gin.Context) {
 	value, exist := ctx.Get("user_id")
 
 	if !exist {
+		if tempPath != "" {
+			os.Remove(tempPath)
+		}
 		ctx.JSON(401, gin.H{
 			"Message": "Your session has expired or is invalid. Please log in again.",
 		})
@@ -248,6 +243,9 @@ func (c *Barang_Controller) Update(ctx *gin.Context) {
 	barang, errUpdate := c.service.Update(request, ID_Gudang, userID, ID)
 
 	if errUpdate != nil {
+		if tempPath != "" {
+			os.Remove(tempPath)
+		}
 		if appError, ok := errUpdate.(*helper.AppError); ok {
 			ctx.JSON(appError.Code, gin.H{
 				"Message": appError.Message,

@@ -543,24 +543,18 @@ Manages user registration and limits.
 
 ---
 
-## Beyond the Code — Performance Benchmark & Trade-off Analysis
-
-### Performance Benchmark & Analysis
-
-  **Image Upload Latency**
-    -   **Cloudinary Upload**: Similar to the AI Service, image uploads are performed during the request processing. Large images will block the `Create Key` response until the upload finishes.
+## Beyond the Code — Trade-off Analysis
 
 ### Trade-off Analysis
 
 | Decision | Trade-off | Rationale |
 | :--- | :--- | :--- |
 | **Monolithic Architecture** | **Pros**: Simple deployment, easier to develop initially. <br> **Cons**: Scaling specific components (like AI processing) requires scaling the whole app. | Suitable for the current scale and bootcamp scope. easy to manage state and database connections. |
-| **Synchronous AI Calls** | **Pros**: Immediate feedback; simple implementation (no message queues required). <br> **Cons**: Poor user experience (latency); if AI service is down, transaction might fail or hang. | Decision limits complexity. In a production environment, this should be moved to a background job (Worker) to decouple transaction recording from analysis. |
 | **PostgreSQL Database** | **Pros**: Reliable, ACID compliance for transactions, strong relational data integrity for inventory. <br> **Cons**: Slightly more setup than SQLite/NoSQL. | Essential for financial/stock data where consistency is critical. |
 
 ## CONCLUSION
 
 The Smart Inventory Management System Backend is conceived as a comprehensive, data-driven solution that automates and optimizes retail inventory control. It provides robust modules for managing users, stores, warehouses, product categories, and goods, enabling seamless administration across the entire supply chain with real-time stock-in/out tracking. Its innovation lies in the integration of Google’s Gemini AI: each transaction triggers on-the-fly analysis of stock movement patterns, generating actionable recommendations for restocking and usage that help business owners make data-driven decisions. These AI-generated insights are recorded in “SmartLog” entries so that historical analysis is retained for future reference. By digitizing the entire workflow from user registration to granular inventory transactions and leveraging Gemini for predictive intelligence, the platform directly addresses the well-known drawbacks of manual inventory management (error-proneness, overstocking, stockouts). The net result is a decision-support framework that optimizes stock levels, reduces waste, and ensures product availability – aligning technological innovation with clear business value.
 
-Architecturally, the backend is built on a clean, modular design with well-defined layers of controllers, services, and repositories. This layered, monolithic deployment simplifies development and state management, although it also means that scaling a specific component (such as the AI analysis service) would require scaling the entire application. Every stock transaction is durably logged in a PostgreSQL database, and a corresponding SmartLog record is created to capture the AI insight. This commitment to a relational (ACID-compliant) datastore reflects a systems-thinking emphasis on data integrity and reliability for business-critical inventory data. The team explicitly documented performance trade-offs: for example, synchronous Gemini API calls provide immediate insight but introduce 1–3 second latencies per transaction, creating a known bottleneck that can be addressed by future asynchronous processing. These thoughtful trade-off analyses – from choosing monolithic simplicity for the bootcamp scope to favoring PostgreSQL over lightweight alternatives – underline the project’s rigor in balancing technical complexity with deployability and business value. In sum, the design demonstrates a critical, systems-level approach: uniting clean architecture and AI-powered analytics to deliver innovative functionality today while carefully planning for long-term scalability and robustness.
+Architecturally, the backend is built on a clean, modular design with well-defined layers of controllers, services, and repositories. This layered, monolithic deployment simplifies development and state management, although it also means that scaling a specific component (such as the AI analysis service) would require scaling the entire application. Every stock transaction is durably logged in a PostgreSQL database, and a corresponding SmartLog record is created to capture the AI insight. This commitment to a relational (ACID-compliant) datastore reflects a systems-thinking emphasis on data integrity and reliability for business-critical inventory data. These thoughtful trade-off analyses – from choosing monolithic simplicity for the bootcamp scope to favoring PostgreSQL over lightweight alternatives – underline the project’s rigor in balancing technical complexity with deployability and business value. In sum, the design demonstrates a critical, systems-level approach: uniting clean architecture and AI-powered analytics to deliver innovative functionality today while carefully planning for long-term scalability and robustness.
 

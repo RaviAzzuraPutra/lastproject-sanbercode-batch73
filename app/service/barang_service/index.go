@@ -9,6 +9,7 @@ import (
 	"last-project/app/interface/repository/toko_repository_interface"
 	"last-project/app/models"
 	"last-project/app/request/barang_request"
+	"os"
 	"time"
 )
 
@@ -45,7 +46,7 @@ func (s *Barang_Service) Create(request *barang_request.Barang_Request, IDGudang
 		return nil, helper.NewBadRequest("Image cannot be empty")
 	}
 
-	if *request.Stock < 0 || request.Sku == nil {
+	if *request.Stock < 0 || request.Stock == nil {
 		return nil, helper.NewBadRequest("Stock cannot under 0 or cannot be empty")
 	}
 
@@ -77,18 +78,15 @@ func (s *Barang_Service) Create(request *barang_request.Barang_Request, IDGudang
 
 	uniqueFileName := fmt.Sprintf("%s-%d", *request.Name, time.Now().UnixNano())
 
-	cloudinaryUpload, errUpload := helper.UploadFotoToCloudinary(*request.Image_url, folderName, uniqueFileName)
-
-	if errUpload != nil {
-		return nil, helper.NewInternalServerError("An error occurred while uploading the image. " + errUpload.Error())
-	}
+	tempFilePath := *request.Image_url
+	placeholderImage := ""
 
 	needRestock := *request.Stock <= *request.Safety_stock
 
 	barang := &models.Barang{
 		Name:           request.Name,
 		Sku:            request.Sku,
-		Image_url:      &cloudinaryUpload,
+		Image_url:      &placeholderImage,
 		Stock:          request.Stock,
 		Safety_stock:   request.Safety_stock,
 		Need_restock:   &needRestock,
@@ -102,6 +100,20 @@ func (s *Barang_Service) Create(request *barang_request.Barang_Request, IDGudang
 	if errCreate != nil {
 		return nil, helper.NewInternalServerError("An error occurred while create barang. " + errCreate.Error())
 	}
+
+	go func() {
+		defer os.Remove(tempFilePath)
+
+		cloudinaryUpload, errUpload := helper.UploadFotoToCloudinary(tempFilePath, folderName, uniqueFileName)
+
+		if errUpload != nil {
+			fmt.Printf("Failed to upload image async (Create): %v\n", errUpload)
+			return
+		}
+
+		barang.Image_url = &cloudinaryUpload
+		s.repository.Update(IDGudang, *barang.ID, barang)
+	}()
 
 	return barang, nil
 
@@ -214,16 +226,12 @@ func (s *Barang_Service) Update(request *barang_request.Barang_Request, GudangID
 	}
 
 	finalImageUrl := *barang.Image_url
+	var tempFilePath string
+	isImageUpdate := false
 
 	if request.Image_url != nil && *request.Image_url != "" {
-		folderName := fmt.Sprintf("toko_%s/gudang_%s", *toko.ID, GudangID)
-		uniqueFileName := fmt.Sprintf("%s-%d", *request.Name, time.Now().UnixNano())
-
-		cloudinaryUpload, errUpload := helper.UploadFotoToCloudinary(*request.Image_url, folderName, uniqueFileName)
-		if errUpload != nil {
-			return nil, helper.NewInternalServerError("Upload error: " + errUpload.Error())
-		}
-		finalImageUrl = cloudinaryUpload
+		tempFilePath = *request.Image_url
+		isImageUpdate = true
 	}
 
 	needRestock := *request.Stock <= *request.Safety_stock
@@ -242,6 +250,24 @@ func (s *Barang_Service) Update(request *barang_request.Barang_Request, GudangID
 
 	if errUpdate != nil {
 		return nil, helper.NewInternalServerError("An error occurred while update barang. " + errUpdate.Error())
+	}
+
+	if isImageUpdate {
+		go func() {
+			defer os.Remove(tempFilePath)
+
+			folderName := fmt.Sprintf("toko_%s/gudang_%s", *toko.ID, GudangID)
+			uniqueFileName := fmt.Sprintf("%s-%d", *request.Name, time.Now().UnixNano())
+
+			cloudinaryUpload, errUpload := helper.UploadFotoToCloudinary(tempFilePath, folderName, uniqueFileName)
+			if errUpload != nil {
+				fmt.Printf("Failed to upload image async (Update): %v\n", errUpload)
+				return
+			}
+
+			barang.Image_url = &cloudinaryUpload
+			s.repository.Update(GudangID, ID, barang)
+		}()
 	}
 
 	return barang, nil
