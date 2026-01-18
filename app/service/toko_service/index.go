@@ -18,7 +18,7 @@ func NewTokoServiceRegistry(repository toko_repository_interface.Toko_Repository
 	}
 }
 
-func (s *Toko_Service) GetByIdAndIdUser(IDUser string) (*models.Toko, error) {
+func (s *Toko_Service) GetByIdUser(IDUser string) (*models.Toko, error) {
 	toko, errGet := s.repository.GetByIdUser(IDUser)
 
 	if errGet != nil {
@@ -56,7 +56,7 @@ func (s *Toko_Service) UpdateToko(ID string, IDUser string, request *toko_reques
 	toko.Address = request.Address
 	toko.UpdatedAt = time.Now()
 
-	errUpdate := s.repository.Update(*toko.ID, IDUser, toko)
+	errUpdate := s.repository.Update(ID, IDUser, toko)
 
 	if errUpdate != nil {
 		return nil, helper.NewInternalServerError("An error occurred while updating toko data. " + errUpdate.Error())

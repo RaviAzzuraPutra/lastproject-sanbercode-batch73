@@ -19,7 +19,7 @@ func UploadFotoToCloudinary(filePath string, folderName string, fileName string)
 	fullFolderPath := fmt.Sprintf("sanbercode/lastproject/%s", folderName)
 
 	if err != nil {
-		NewInternalServerError("An error occurred while cloudinary. " + err.Error())
+		return "", NewInternalServerError("An error occurred while cloudinary. " + err.Error())
 	}
 
 	uploadResult, errUpload := cld.Upload.Upload(
@@ -32,7 +32,7 @@ func UploadFotoToCloudinary(filePath string, folderName string, fileName string)
 	)
 
 	if errUpload != nil {
-		NewInternalServerError("An error occurred while uploading the image. " + errUpload.Error())
+		return "", NewInternalServerError("An error occurred while uploading the image. " + errUpload.Error())
 	}
 
 	return uploadResult.SecureURL, nil

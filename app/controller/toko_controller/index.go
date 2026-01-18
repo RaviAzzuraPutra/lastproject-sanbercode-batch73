@@ -30,7 +30,7 @@ func (c *Toko_Controller) Get(ctx *gin.Context) {
 
 	userID := value.(string)
 
-	toko, errGet := c.service.GetByIdAndIdUser(userID)
+	toko, errGet := c.service.GetByIdUser(userID)
 
 	if errGet != nil {
 		if appError, ok := errGet.(*helper.AppError); ok {

@@ -14,66 +14,63 @@ import (
 )
 
 type InventoryAiResponse struct {
-	EOQRecomendation int    `json:"eoq_recomendation"`
-	Decision         string `json:"decision"`
-	Insight          string `json:"insight"`
+	Decision string `json:"decision"`
+	Insight  string `json:"insight"`
 }
 
-func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand int, leadTimeDays int) (int, string, string, error) {
+func GeminiInsight(itemName string, currentStock int, trxType string, trxQty int) (string, string, error) {
 	ctx := context.Background()
 
 	client, clientError := genai.NewClient(ctx, option.WithAPIKey(gemini_config.GEMINI_API_KEY))
-
 	if clientError != nil {
-		return 0, "", "", NewInternalServerError(clientError.Error())
+		return "", "", NewInternalServerError(clientError.Error())
 	}
-
 	defer client.Close()
 
 	geminiModel := client.GenerativeModel(os.Getenv("MODEL"))
-
 	now := time.Now().Format("2006-01-02")
 
 	prompt := fmt.Sprintf(`
-	You are an expert inventory management AI specializing in supply chain, EOQ, and ROP, position yourself as a PhD professor.
 
-	Return STRICT JSON ONLY in the format below:
-	{
-		"eoq_recommendation": number,
-		"decision": "REORDER NOW | MONITOR | SAFE",
-		"ai_insight": "string"
-	}
+		You are an expert inventory management AI And Position yourself as a PhD professor by offering critical, academic and theoretical advice, but still using everyday language...
+		Your task is to provide deep, analytical, and critical advice, BUT you must explain complex academic concepts using very simple, everyday "Warung/UMKM" metaphors.
 
-	Item Name: %s
-	Current Stock: %d
-	Reorder Point (ROP): %d
-	EOQ (Economic Order Quantity): %d
-	Average Daily Demand: %d
-	Lead Time (Days): %d
-	Today: %s
+		Return STRICT JSON ONLY:
+		{
+		"decision": "SAFE | MONITOR | WARNING",
+		"insight": "string"
+		}
 
-	RULES:
-	1. If current stock <= ROP → decision MUST be "REORDER NOW"
-	2. If stock is slightly above ROP → "MONITOR"
-	3. If stock is far above ROP → "SAFE"
-	4. EOQ Recommendation may adjust from provided EOQ if AI believes smarter value exists based on risk reasoning.
-	5. ai_insight must be:
-		- Written in indonesian language
-		- Contextual, analytical
-		- Explains urgency, risk of stockout, potential operational impact
-		- Provide recommended strategy
-	6. Use \\n for line breaks
-	7. Maximum 400 words
-	8. NO markdown, no explanation outside JSON
-	`, itemName, currentStock, rop, eoq, avgDailyDemand, leadTimeDays, now)
+		Item Name: %s
+		Current Stock: %d
+		Transaction Type: %s
+		Transaction Quantity: %d
+		Date: %s
+
+		RULES:
+			1. Decision reflects risk level after transaction.
+			2. ai_insight must be:
+				- Written in Indonesian Language
+				- Appreciation/Observation of the transaction.
+				- Explain risk of stockout or overstock (in simple words)
+				- Practical recommendation for the owner.
+				- Conclusion
+			3. Max 99 words
+			4. No markdown, no explanation outside JSON
+			5. No Jargon: Do NOT use terms like 'EOQ', 'Lead Time', 'Safety Stock', or 'FIFO' directly. 
+           Instead, explain the logic behind them (e.g., instead of 'FIFO', say 'jual barang yang masuk duluan agar tidak basi').
+		   6. Tone: Like a friendly professor explaining to a small business owner.
+		   7. Analytical: Don't just say 'stock is enough'. Explain the 'Why' and 'What next'.
+		   8. The conclusion must remain academic, critical and theoretical.
+		`, itemName, currentStock, trxType, trxQty, now)
 
 	resp, err := geminiModel.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		return 0, "", "", NewInternalServerError(err.Error())
+		return "", "", NewInternalServerError(err.Error())
 	}
 
 	if len(resp.Candidates) == 0 {
-		return 0, "", "", NewInternalServerError("no response from Gemini")
+		return "", "", NewInternalServerError("no response from Gemini")
 	}
 
 	var text string
@@ -85,29 +82,23 @@ func Gemini(itemName string, currentStock int, rop int, eoq int, avgDailyDemand 
 
 	start := strings.Index(text, "{")
 	end := strings.LastIndex(text, "}")
-
 	if start == -1 || end == -1 {
-		return 0, "", "", NewInternalServerError("invalid AI JSON response\nRaw: " + text)
+		return "", "", NewInternalServerError("invalid AI JSON response\nRaw: " + text)
 	}
 
-	jsonStr := text[start : end+1]
-
+	jsonStr := strings.TrimSpace(text[start : end+1])
 	jsonStr = strings.ReplaceAll(jsonStr, "\n", "")
 	jsonStr = strings.ReplaceAll(jsonStr, "\r", "")
 	jsonStr = strings.ReplaceAll(jsonStr, "\t", "")
-	jsonStr = strings.ReplaceAll(jsonStr, "```json", "")
-	jsonStr = strings.ReplaceAll(jsonStr, "```", "")
-	jsonStr = strings.TrimSpace(jsonStr)
 
 	if !json.Valid([]byte(jsonStr)) {
-		return 0, "", "", NewInternalServerError("invalid JSON format\nResponse: " + text)
+		return "", "", NewInternalServerError("invalid JSON format\nResponse: " + text)
 	}
 
 	var result InventoryAiResponse
-
 	if err := json.Unmarshal([]byte(jsonStr), &result); err != nil {
-		return 0, "", "", NewInternalServerError("failed to parse JSON: " + err.Error() + text)
+		return "", "", NewInternalServerError("failed to parse JSON: " + err.Error())
 	}
 
-	return result.EOQRecomendation, result.Decision, result.Insight, nil
+	return result.Decision, result.Insight, nil
 }

@@ -78,8 +78,6 @@ CREATE TABLE smart_log (
     gudang_id UUID NOT NULL,
     period_month INT,
     period_year INT,
-    eoq_calculation_result INT,
-    rop_value INT,
     ai_insight TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

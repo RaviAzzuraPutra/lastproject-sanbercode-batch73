@@ -18,8 +18,10 @@ type Barang struct {
 	CreatedAt      time.Time `gorm:"column:created_at"`
 	UpdatedAt      time.Time `gorm:"column:updated_at"`
 
-	Gudang   *Gudang   `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
-	Category *Category `gorm:"foreignKey:CategoryID;references:ID;constraint:OnDelete:SET NULL"`
+	Gudang    *Gudang    `gorm:"foreignKey:GudangID;references:ID;constraint:OnDelete:CASCADE"`
+	Category  *Category  `gorm:"foreignKey:CategoryID;references:ID;constraint:OnDelete:SET NULL"`
+	Trx_Log   *[]Trx_Log `gorm:"foreignKey:BarangID;references:ID"`
+	Smart_Log *Smart_Log `gorm:"foreignKey:BarangID;references:ID"`
 }
 
 func (Barang) TableName() string {
