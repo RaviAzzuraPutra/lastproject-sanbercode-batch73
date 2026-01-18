@@ -60,6 +60,13 @@ func (s *Trx_Service) Create(request *trx_request.Trx_Log_Request, IDGudang stri
 		finalStock = currentStock - *request.Qty
 	}
 
+	needRestock := false
+	if barang.Safety_stock != nil && finalStock <= *barang.Safety_stock {
+		needRestock = true
+	} else if finalStock > *barang.Safety_stock {
+		needRestock = false
+	}
+
 	trx := &models.Trx_Log{
 		BarangID: barang.ID,
 		GudangID: &IDGudang,
@@ -74,6 +81,7 @@ func (s *Trx_Service) Create(request *trx_request.Trx_Log_Request, IDGudang stri
 	}
 
 	barang.Stock = &finalStock
+	barang.Need_restock = &needRestock
 	barang.UpdatedAt = time.Now()
 
 	errUpdate := s.barang.Update(*barang.GudangID, *barang.ID, barang)
