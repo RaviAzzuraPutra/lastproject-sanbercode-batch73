@@ -97,27 +97,24 @@ func (s *Trx_Service) Create(request *trx_request.Trx_Log_Request, IDGudang stri
 
 	latestStock := *barang.Stock
 
-	_, aiInsight, errAi := helper.GeminiInsight(itemName, latestStock, string(trxType), *request.Qty)
+	go func(itemName string, latestStock int, trxType string, trxQty int, barangID string, gudangID string) {
+		_, aiInsight, errAi := helper.GeminiInsight(itemName, latestStock, trxType, trxQty)
 
-	if errAi == nil {
-		month := int(time.Now().Month())
-		year := time.Now().Year()
+		if errAi == nil {
+			month := int(time.Now().Month())
+			year := time.Now().Year()
 
-		smartLog := &models.Smart_Log{
-			BarangID:     barang.ID,
-			GudangID:     &IDGudang,
-			Period_month: &month,
-			Period_year:  &year,
-			AI_Insight:   &aiInsight,
+			smartLog := &models.Smart_Log{
+				BarangID:     barang.ID,
+				GudangID:     &IDGudang,
+				Period_month: &month,
+				Period_year:  &year,
+				AI_Insight:   &aiInsight,
+			}
+
+			_ = s.smartLog.Create(smartLog)
 		}
-
-		errSmartLog := s.smartLog.Create(smartLog)
-
-		if errSmartLog != nil {
-			return nil, helper.NewInternalServerError("An error occurred while create smart log. " + errSmartLog.Error())
-		}
-
-	}
+	}(itemName, latestStock, string(trxType), *request.Qty, *barang.ID, IDGudang)
 
 	return trx, nil
 
