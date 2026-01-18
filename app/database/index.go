@@ -26,6 +26,8 @@ func Connect() error {
 		return fmt.Errorf("An error occurred while attempting to connect to the database. " + errorConnect.Error())
 	}
 
+	DB.Exec("CREATE TYPE trx_type AS ENUM ('in', 'out');")
+
 	errMigrate := DB.AutoMigrate(&models.Barang{}, &models.Category{}, &models.Gudang{}, &models.Smart_Log{}, &models.Toko{}, &models.Trx_Log{}, &models.User{})
 
 	if errMigrate != nil {
