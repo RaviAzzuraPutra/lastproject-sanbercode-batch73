@@ -111,8 +111,10 @@ func (s *Barang_Service) Create(request *barang_request.Barang_Request, IDGudang
 			return
 		}
 
-		barang.Image_url = &cloudinaryUpload
-		s.repository.Update(IDGudang, *barang.ID, barang)
+		updateData := &models.Barang{
+			Image_url: &cloudinaryUpload,
+		}
+		s.repository.Update(IDGudang, *barang.ID, updateData)
 	}()
 
 	return barang, nil
@@ -265,8 +267,10 @@ func (s *Barang_Service) Update(request *barang_request.Barang_Request, GudangID
 				return
 			}
 
-			barang.Image_url = &cloudinaryUpload
-			s.repository.Update(GudangID, ID, barang)
+			updateData := &models.Barang{
+				Image_url: &cloudinaryUpload,
+			}
+			s.repository.Update(GudangID, ID, updateData)
 		}()
 	}
 
