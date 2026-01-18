@@ -547,12 +547,7 @@ Manages user registration and limits.
 
 ### Performance Benchmark & Analysis
 
-1.  **Synchronous AI Integration Impact**
-    -   **Bottleneck Analysis**: The current implementation calls `helper.GeminiInsight` synchronously during the Transaction creation (`TrxController.Create` -> `TrxService.Create`).
-    -   **Impact**: This introduces significant latency. External AI API calls can take 1-3 seconds. This means the user must wait for the AI analysis to complete before the stock move is confirmed.
-    -   **Constraint**: High response time for simple stock operations.
-
-2.  **Image Upload Latency**
+  **Image Upload Latency**
     -   **Cloudinary Upload**: Similar to the AI Service, image uploads are performed during the request processing. Large images will block the `Create Key` response until the upload finishes.
 
 ### Trade-off Analysis

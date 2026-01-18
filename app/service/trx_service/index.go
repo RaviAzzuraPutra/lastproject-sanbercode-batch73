@@ -105,8 +105,8 @@ func (s *Trx_Service) Create(request *trx_request.Trx_Log_Request, IDGudang stri
 			year := time.Now().Year()
 
 			smartLog := &models.Smart_Log{
-				BarangID:     barang.ID,
-				GudangID:     &IDGudang,
+				BarangID:     &barangID,
+				GudangID:     &gudangID,
 				Period_month: &month,
 				Period_year:  &year,
 				AI_Insight:   &aiInsight,
